@@ -113,6 +113,8 @@ body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
 .pet-card .emoji{ font-size:44px;position:relative;z-index:1;filter:drop-shadow(0 3px 3px rgba(0,0,0,0.3)); }
 .pet-card .pname{ font-size:13px;font-weight:800;color:#2a2a44;margin-top:2px;position:relative;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 .pet-card .prare{ font-size:10px;font-weight:700;opacity:0.7;color:#2a2a44;position:relative;z-index:1; }
+.pet-card .pstat{ font-size:9px;font-weight:800;color:#2a2a44;opacity:.85;position:relative;z-index:1;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.pet-card .prole{ font-size:9px;font-weight:700;position:relative;z-index:1;margin-top:1px; }
 .pet-card .pcount{ position:absolute;top:4px;right:6px;font-size:12px;font-weight:800;color:#fff;background:rgba(0,0,0,0.4);border-radius:8px;padding:1px 6px;z-index:2; }
 .pet-card.locked{ filter:grayscale(0.9) brightness(0.7); }
 .pet-card.equipped{ outline:4px solid var(--green);outline-offset:1px; }
@@ -237,6 +239,12 @@ async function hashPassword(password, saltHex){
   return { salt: buf2hex(salt), hash: buf2hex(bits) };
 }
 const genId = () => crypto.randomUUID?.() || ("p"+Date.now()+Math.random().toString(36).slice(2));
+const ROLES = {
+  click:{label:"Klick-Spezi",emoji:"🎯",color:"#d96a28"},
+  idle:{label:"Idle-Spezi",emoji:"⏰",color:"#2884c8"},
+  multi:{label:"Multi-Spezi",emoji:"💰",color:"#b88a14"},
+  allround:{label:"Allrounder",emoji:"⭐",color:"#8a4ec8"},
+};
 const RARITIES = {
   Common:{label:"Gewöhnlich",color:"#b4b4c3",order:1}, Rare:{label:"Selten",color:"#78c8dc",order:2},
   Epic:{label:"Episch",color:"#b482dc",order:3}, Legendary:{label:"Legendär",color:"#ffb450",order:4},
@@ -244,30 +252,30 @@ const RARITIES = {
   Secret:{label:"Geheim",color:"#6a4c93",order:7}, Celestial:{label:"Himmlisch",color:"#50dcc8",order:8},
 };
 const PETS = {
-  1:{id:1,emoji:"🐱",name:"Katze",rarity:"Common",click:1,idle:0,mult:1},
-  2:{id:2,emoji:"🐶",name:"Hund",rarity:"Common",click:0,idle:1,mult:1},
-  3:{id:3,emoji:"🐰",name:"Hase",rarity:"Common",click:1,idle:1,mult:1},
-  100:{id:100,emoji:"🦊",name:"Fuchs",rarity:"Rare",click:5,idle:0,mult:1.1},
-  101:{id:101,emoji:"🐻",name:"Bär",rarity:"Rare",click:3,idle:3,mult:1.1},
-  102:{id:102,emoji:"🐮",name:"Kuh",rarity:"Rare",click:0,idle:8,mult:1.1},
-  200:{id:200,emoji:"🦁",name:"Löwe",rarity:"Epic",click:25,idle:0,mult:1.2},
-  201:{id:201,emoji:"🐯",name:"Tiger",rarity:"Epic",click:15,idle:15,mult:1.2},
-  202:{id:202,emoji:"🐺",name:"Wolf",rarity:"Epic",click:0,idle:40,mult:1.2},
-  300:{id:300,emoji:"🐲",name:"Drache",rarity:"Legendary",click:120,idle:0,mult:1.5},
-  301:{id:301,emoji:"🦄",name:"Einhorn",rarity:"Legendary",click:0,idle:200,mult:1.3},
-  302:{id:302,emoji:"🐉",name:"Wyvern",rarity:"Legendary",click:80,idle:80,mult:1.4},
-  400:{id:400,emoji:"👹",name:"Oni",rarity:"Mythic",click:800,idle:0,mult:2.0},
-  401:{id:401,emoji:"🦅",name:"Adler",rarity:"Mythic",click:0,idle:1200,mult:1.6},
-  402:{id:402,emoji:"🐙",name:"Krake",rarity:"Mythic",click:500,idle:500,mult:1.8},
-  500:{id:500,emoji:"🔱",name:"Poseidon",rarity:"God",click:6000,idle:0,mult:2.5},
-  501:{id:501,emoji:"👑",name:"Imperator",rarity:"God",click:0,idle:9000,mult:2.2},
-  502:{id:502,emoji:"🌋",name:"Magma",rarity:"God",click:5000,idle:5000,mult:3.0},
-  600:{id:600,emoji:"🤖",name:"Roboter",rarity:"Secret",click:60000,idle:0,mult:4.0},
-  601:{id:601,emoji:"👾",name:"Alien",rarity:"Secret",click:0,idle:90000,mult:3.5},
-  602:{id:602,emoji:"💀",name:"Reaper",rarity:"Secret",click:50000,idle:50000,mult:3.8},
-  700:{id:700,emoji:"🌟",name:"Stern",rarity:"Celestial",click:600000,idle:0,mult:5.0},
-  701:{id:701,emoji:"☄️",name:"Komet",rarity:"Celestial",click:0,idle:900000,mult:4.5},
-  702:{id:702,emoji:"🪐",name:"Planet",rarity:"Celestial",click:500000,idle:500000,mult:5.0},
+  1:{id:1,emoji:"🐱",name:"Katze",rarity:"Common",role:"click",click:1,idle:0,mult:1},
+  2:{id:2,emoji:"🐶",name:"Hund",rarity:"Common",role:"idle",click:0,idle:1,mult:1},
+  3:{id:3,emoji:"🐰",name:"Hase",rarity:"Common",role:"allround",click:1,idle:1,mult:1},
+  100:{id:100,emoji:"🦊",name:"Fuchs",rarity:"Rare",role:"click",click:5,idle:0,mult:1.1},
+  101:{id:101,emoji:"🐻",name:"Bär",rarity:"Rare",role:"allround",click:3,idle:3,mult:1.1},
+  102:{id:102,emoji:"🐮",name:"Kuh",rarity:"Rare",role:"idle",click:0,idle:8,mult:1.1},
+  200:{id:200,emoji:"🦁",name:"Löwe",rarity:"Epic",role:"click",click:25,idle:0,mult:1.2},
+  201:{id:201,emoji:"🐯",name:"Tiger",rarity:"Epic",role:"allround",click:15,idle:15,mult:1.2},
+  202:{id:202,emoji:"🐺",name:"Wolf",rarity:"Epic",role:"idle",click:0,idle:40,mult:1.2},
+  300:{id:300,emoji:"🐲",name:"Drache",rarity:"Legendary",role:"click",click:120,idle:0,mult:1.5},
+  301:{id:301,emoji:"🦄",name:"Einhorn",rarity:"Legendary",role:"idle",click:0,idle:200,mult:1.3},
+  302:{id:302,emoji:"🐉",name:"Wyvern",rarity:"Legendary",role:"allround",click:80,idle:80,mult:1.4},
+  400:{id:400,emoji:"👹",name:"Oni",rarity:"Mythic",role:"click",click:800,idle:0,mult:2.0},
+  401:{id:401,emoji:"🦅",name:"Adler",rarity:"Mythic",role:"idle",click:0,idle:1200,mult:1.6},
+  402:{id:402,emoji:"🐙",name:"Krake",rarity:"Mythic",role:"allround",click:500,idle:500,mult:1.8},
+  500:{id:500,emoji:"🔱",name:"Poseidon",rarity:"God",role:"multi",click:6000,idle:0,mult:2.5},
+  501:{id:501,emoji:"👑",name:"Imperator",rarity:"God",role:"idle",click:0,idle:9000,mult:2.2},
+  502:{id:502,emoji:"🌋",name:"Magma",rarity:"God",role:"multi",click:5000,idle:5000,mult:3.0},
+  600:{id:600,emoji:"🤖",name:"Roboter",rarity:"Secret",role:"click",click:60000,idle:0,mult:4.0},
+  601:{id:601,emoji:"👾",name:"Alien",rarity:"Secret",role:"idle",click:0,idle:90000,mult:3.5},
+  602:{id:602,emoji:"💀",name:"Reaper",rarity:"Secret",role:"allround",click:50000,idle:50000,mult:3.8},
+  700:{id:700,emoji:"🌟",name:"Stern",rarity:"Celestial",role:"click",click:600000,idle:0,mult:5.0},
+  701:{id:701,emoji:"☄️",name:"Komet",rarity:"Celestial",role:"idle",click:0,idle:900000,mult:4.5},
+  702:{id:702,emoji:"🪐",name:"Planet",rarity:"Celestial",role:"multi",click:500000,idle:500000,mult:5.0},
 };
 const EGGS = {
   basic:{emoji:"🥚",name:"Basis-Ei",cost:50,drops:{Common:75,Rare:22,Epic:3}},
@@ -285,9 +293,9 @@ const UPGRADES = {
   click4:{id:"click4",emoji:"💥",name:"Mega-Klick",     unit:"pro Klick",  type:"click",base:1e7,    mult:1.18,per:4000, reb:9, order:7},
   idle4: {id:"idle4", emoji:"🏰",name:"Imperium",       unit:"pro Sekunde",type:"idle", base:5e7,    mult:1.21,per:3000, reb:12,order:8},
 };
-const BASE_CLICK=1, REBIRTH_BASE=1e6, REBIRTH_SCALE=8, OFFLINE_CAP_H=8;
+const BASE_CLICK=1, REBIRTH_BASE=5000, REBIRTH_SCALE=6.5, OFFLINE_CAP_H=8;
 const SESSION_KEY="ec_session";
-function freshState(){ return { coins:0, totalEarned:0, totalClicks:0, rebirths:0, upgrades:{}, equipped:1, pets:{1:1}, createdAt:Date.now(), lastSeen:Date.now(), name:"" }; }
+function freshState(){ return { coins:0, totalEarned:0, lifetimeEarned:0, totalClicks:0, rebirths:0, upgrades:{}, equipped:1, pets:{1:1}, createdAt:Date.now(), lastSeen:Date.now(), name:"" }; }
 let S = freshState();
 let playerId = null, currentUsername = "";
 let dirty=false, loaded=false, selMult="1", loopsStarted=false, authMode="login";
@@ -315,7 +323,9 @@ function migrateState(s){
   if(!s.upgrades||typeof s.upgrades!=="object") s.upgrades={};
   if(typeof s.clickLevel==="number" && s.clickLevel>0) s.upgrades.click1=(s.upgrades.click1||0)+s.clickLevel;
   if(typeof s.idleLevel==="number" && s.idleLevel>0) s.upgrades.idle1=(s.upgrades.idle1||0)+s.idleLevel;
-  delete s.clickLevel; delete s.idleLevel; return s;
+  delete s.clickLevel; delete s.idleLevel;
+  if(typeof s.lifetimeEarned!=="number") s.lifetimeEarned=Math.max(s.totalEarned||0,0);
+  return s;
 }
 function setSession(pid,user){ localStorage.setItem(SESSION_KEY, JSON.stringify({playerId:pid,username:user})); }
 function showAuth(){ document.getElementById("authModal").classList.add("open"); setAuthMode("login"); }
@@ -358,7 +368,7 @@ async function login(user,pw){
   setSession(acc.playerId, acc.username); offlineEarnings(); save(true); afterAuth(); }
 function logout(){ if(!confirm("Abmelden?")) return; save(true); localStorage.removeItem(SESSION_KEY); location.reload(); }
 function offlineEarnings(){ const el=Math.min((Date.now()-(S.lastSeen||Date.now()))/1000, OFFLINE_CAP_H*3600);
-  if(el>30 && idlePerSec()>0){ const e=idlePerSec()*el; S.coins+=e; S.totalEarned+=e; dirty=true; toast(`💤 Willkommen zurück! +${fmt(e)}`); } }
+  if(el>30 && idlePerSec()>0){ const e=idlePerSec()*el; S.coins+=e; S.totalEarned+=e; S.lifetimeEarned+=e; dirty=true; toast(`💤 Willkommen zurück! +${fmt(e)}`); } }
 function afterAuth(){ hideAuth(); document.getElementById("userChip").textContent="👤 "+currentUsername; loaded=true; renderAll(); startLoopsOnce(); }
 function boot(){
   const s=JSON.parse(localStorage.getItem(SESSION_KEY)||"null");
@@ -369,10 +379,10 @@ function boot(){
       offlineEarnings(); afterAuth(); save(true); })();
   } else { showAuth(); } }
 async function save(force){ if(!playerId) return; if(!loaded&&!force) return; S.lastSeen=Date.now();
-  try{ await dbUpdate(playerPath(playerId),{ name:S.name,coins:S.coins,totalEarned:S.totalEarned,totalClicks:S.totalClicks,
+  try{ await dbUpdate(playerPath(playerId),{ name:S.name,coins:S.coins,totalEarned:S.totalEarned,lifetimeEarned:S.lifetimeEarned,totalClicks:S.totalClicks,
     rebirths:S.rebirths,upgrades:S.upgrades,equipped:S.equipped,pets:S.pets,createdAt:S.createdAt,lastSeen:S.lastSeen });
     dirty=false; }catch(e){ console.error(e); } }
-function doClick(ev){ const v=clickValue(); S.coins+=v; S.totalEarned+=v; S.totalClicks++; dirty=true;
+function doClick(ev){ const v=clickValue(); S.coins+=v; S.totalEarned+=v; S.lifetimeEarned+=v; S.totalClicks++; dirty=true;
   const el=document.getElementById("clicker"); el.classList.remove("squash"); void el.offsetWidth; el.classList.add("squash");
   spawnFloat("+$"+fmt(v), ev, true); updateHud(); }
 function spawnFloat(txt, ev, isClick){ const f=document.createElement("div"); f.className="float"+(isClick?" click":""); f.textContent=txt;
@@ -419,14 +429,16 @@ function renderList(){ const list=document.getElementById("list"); const rc=rebi
   list.innerHTML=html;
   list.querySelector("[data-rebirth]").onclick=()=>openPanel("rebirth");
   list.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>buyUpgrade(b.dataset.buy)); }
+function petStatLine(p){ const a=[]; if(p.click>0)a.push("👊+"+fmt(p.click)); if(p.idle>0)a.push("⏰+"+fmt(p.idle)); if(p.mult>1)a.push("✖"+p.mult); return a.join("  "); }
 function renderPets(){ const body=document.getElementById("panelBody");
   const owned=Object.keys(S.pets).filter(k=>S.pets[k]>0).length;
   const all=Object.values(PETS).sort((a,b)=>RARITIES[a.rarity].order-RARITIES[b.rarity].order||a.id-b.id);
   body.innerHTML=`<div class="empty-note" style="padding:4px 0 12px">Gesammelt: ${owned}/${all.length}</div><div class="grid">`+
-    all.map(p=>{ const c=S.pets[p.id]||0,have=c>0,r=RARITIES[p.rarity],eq=S.equipped==p.id;
+    all.map(p=>{ const c=S.pets[p.id]||0,have=c>0,r=RARITIES[p.rarity],eq=S.equipped==p.id,ro=ROLES[p.role]||ROLES.allround;
       return `<div class="pet-card ${have?"":"locked"} ${eq?"equipped":""}" style="background:${r.color}">
         ${have?`<div class="pcount">x${c}</div>`:""}<div class="emoji">${have?p.emoji:"❔"}</div>
         <div class="pname">${have?p.name:"???"}</div><div class="prare">${r.label}</div>
+        ${have?`<div class="prole" style="color:${ro.color}">${ro.emoji} ${ro.label}</div><div class="pstat">${petStatLine(p)}</div>`:""}
         ${have&&!eq?`<button class="eb" data-equip="${p.id}">Ausrüsten</button>`:""}
         ${eq?`<div class="eb" style="background:linear-gradient(180deg,#cfcfe0,#9a9ab8);color:#2a2a44">Aktiv ✓</div>`:""}</div>`; }).join("")+`</div>`;
   body.querySelectorAll("[data-equip]").forEach(b=>b.onclick=()=>equipPet(b.dataset.equip)); }
@@ -450,13 +462,13 @@ function renderRebirth(){ const body=document.getElementById("panelBody"); const
   const b=document.getElementById("doReb"); if(b)b.onclick=doRebirth; }
 async function renderLeaderboard(){ const body=document.getElementById("panelBody"); body.innerHTML=`<div class="empty-note">Lädt…</div>`;
   let players={}; try{ players=await dbGet(TABLES.players)||{}; }catch(e){ body.innerHTML=`<div class="empty-note">⚠️ Nicht verfügbar</div>`; return; }
-  const list=Object.entries(players).map(([id,p])=>({id,name:p.name||"???",score:p.totalEarned||0,reb:p.rebirths||0}))
-    .sort((a,b)=>b.reb-a.reb||b.score-a.score).slice(0,50);
+  const list=Object.entries(players).map(([id,p])=>({id,name:p.name||"???",reb:p.rebirths||0,life:p.lifetimeEarned||p.totalEarned||0}))
+    .sort((a,b)=>b.reb-a.reb||b.life-a.life).slice(0,50);
   if(!list.length){ body.innerHTML=`<div class="empty-note">Noch keine Spieler</div>`; return; }
   const medal=i=>i===0?"🥇":i===1?"🥈":i===2?"🥉":"#"+(i+1);
-  body.innerHTML=list.map((p,i)=>`<div class="lb-row ${p.id===playerId?"me":""}"><div class="rank">${medal(i)}</div>
-    <div class="lbname">${esc(p.name)} ${p.reb?`<span style="opacity:.6;font-size:11px">🔄${p.reb}</span>`:""}</div>
-    <div class="lbval">${fmt(p.score)}</div></div>`).join(""); }
+  body.innerHTML=`<div class="empty-note" style="padding:2px 0 10px">Rang nach Wiedergeburten</div>`+list.map((p,i)=>`<div class="lb-row ${p.id===playerId?"me":""}"><div class="rank">${medal(i)}</div>
+    <div class="lbname">${esc(p.name)}<div style="font-size:11px;opacity:.65;font-weight:600">💵 ${fmt(p.life)} gesamt</div></div>
+    <div class="lbval">🔄 ${p.reb}</div></div>`).join(""); }
 function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
 const PANELS={ pets:{t:"🐾 Meine Pets",r:renderPets}, eggs:{t:"🥚 Eier",r:renderEggs}, rebirth:{t:"🔄 Wiedergeburt",r:renderRebirth}, lb:{t:"🏆 Rangliste",r:renderLeaderboard} };
 function openPanel(k){ const p=PANELS[k]; if(!p)return; document.getElementById("panelTitle").textContent=p.t; document.getElementById("panelWrap").classList.add("open"); p.r(); }
@@ -469,7 +481,7 @@ function showHatch(pet){ const r=RARITIES[pet.rarity]; document.getElementById("
 let toastT; function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
 function startLoopsOnce(){ if(loopsStarted) return; loopsStarted=true;
   let lastTick=Date.now();
-  setInterval(()=>{ const now=Date.now(),dt=(now-lastTick)/1000; lastTick=now; const inc=idlePerSec()*dt; if(inc>0){ S.coins+=inc; S.totalEarned+=inc; dirty=true; updateHud(); } },100);
+  setInterval(()=>{ const now=Date.now(),dt=(now-lastTick)/1000; lastTick=now; const inc=idlePerSec()*dt; if(inc>0){ S.coins+=inc; S.totalEarned+=inc; S.lifetimeEarned+=inc; dirty=true; updateHud(); } },100);
   setInterval(()=>{ const i=idlePerSec(); if(i>0) spawnFloat("+$"+fmt(i),null,false); },1000);
   setInterval(()=>{ if(document.getElementById("list").children.length) renderList(); },600);
   setInterval(()=>{ if(dirty) save(); },8000); }
