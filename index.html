@@ -157,6 +157,27 @@ body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
 .empty-note{ text-align:center;color:#2a2a44;opacity:0.7;font-weight:700;padding:24px 10px; }
 #toast{ position:fixed;top:74px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(0,0,0,0.82);color:#fff;padding:12px 22px;border-radius:14px;font-weight:700;z-index:50;opacity:0;transition:all 0.3s;pointer-events:none;border:2px solid rgba(255,255,255,0.2);text-align:center;max-width:90vw; }
 #toast.show{ opacity:1;transform:translateX(-50%) translateY(0); }
+/* ===== Boss System ===== */
+#bossBadge{ position:absolute;top:-8px;right:-8px;background:linear-gradient(180deg,#ff6060,#c02020);color:#fff;font-size:11px;font-weight:800;border-radius:50%;min-width:22px;height:22px;display:none;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);animation:bossping 1s infinite; }
+#bossBadge.show{ display:flex; }
+@keyframes bossping{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.2);} }
+#bossWrap{ position:fixed;inset:0;z-index:25;display:none;align-items:center;justify-content:center;background:rgba(10,0,20,0.85);backdrop-filter:blur(6px); }
+#bossWrap.open{ display:flex; }
+#bossBox{ position:relative;width:min(94vw,460px);background:linear-gradient(180deg,#2a0a3a,#1a0628);border:4px solid #8a20c8;border-radius:24px;padding:20px;box-shadow:0 0 60px rgba(180,0,255,0.4);text-align:center; }
+#bossEmoji{ font-size:clamp(80px,20vw,120px);animation:bossshake 0.5s infinite;filter:drop-shadow(0 0 20px rgba(255,0,100,0.8)); }
+@keyframes bossshake{ 0%,100%{transform:rotate(-3deg) scale(1);} 50%{transform:rotate(3deg) scale(1.05);} }
+#bossEmoji.hit{ animation:bosshit 0.2s ease-out forwards; }
+@keyframes bosshit{ 0%{transform:scale(1.3);filter:drop-shadow(0 0 40px rgba(255,255,255,1));} 100%{transform:scale(1);filter:drop-shadow(0 0 20px rgba(255,0,100,0.8));} }
+#bossName{ font-size:22px;font-weight:800;color:#ff80ff;text-shadow:0 0 10px rgba(255,0,255,0.6);margin:6px 0 2px; }
+#bossTimer{ font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:12px; }
+#bossHpWrap{ width:100%;height:28px;background:rgba(0,0,0,0.4);border-radius:14px;overflow:hidden;border:3px solid rgba(255,0,100,0.4);margin-bottom:6px; }
+#bossHpBar{ height:100%;background:linear-gradient(90deg,#ff2060,#ff80a0);border-radius:12px;transition:width 0.3s; }
+#bossHpText{ font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:14px; }
+#bossParticipants{ font-size:12px;color:rgba(255,200,255,0.8);margin-bottom:14px; }
+#bossClickBtn{ width:100%;padding:18px;border:3px solid #8a20c8;border-radius:16px;background:linear-gradient(180deg,#c060ff,#8020c0);color:#fff;font-family:inherit;font-size:20px;font-weight:800;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,0.4);transition:transform 0.08s; }
+#bossClickBtn:active{ transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,0.4); }
+#bossRewardBox{ display:none;padding:16px;background:rgba(255,215,0,0.12);border:3px solid rgba(255,215,0,0.4);border-radius:16px;margin-top:12px; }
+#bossCloseBtn{ margin-top:12px;width:100%;padding:12px;border:3px solid #4a3060;border-radius:13px;background:linear-gradient(180deg,#6a3090,#4a1060);color:#fff;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.3); }
 /* ===== Diamant-Animation ===== */
 .gem-fly{ position:fixed;font-size:26px;pointer-events:none;z-index:100;transition:none;filter:drop-shadow(0 2px 6px rgba(100,180,255,0.8)); }
 @keyframes gemPop{ 0%{transform:scale(0) rotate(-20deg);opacity:1;} 20%{transform:scale(1.4) rotate(10deg);opacity:1;} 100%{transform:scale(0.8) rotate(0deg);opacity:0.9;} }
@@ -211,6 +232,7 @@ body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
         <button class="side-btn" id="petsBtn">🐾</button>
         <button class="side-btn" id="eggsBtn" style="position:relative">🥚<span id="gemBadge"></span></button>
         <button class="side-btn" id="lbBtn">🏆</button>
+        <button class="side-btn" id="bossBtn" style="position:relative">😈<span id="bossBadge"></span></button>
       </div>
       <div id="clicker">🐱</div>
       <div id="moneyRow"><span class="cash">💵</span><span id="money" class="outlined-green">0</span></div>
@@ -232,6 +254,19 @@ body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
   <div class="panel-body" id="panelBody"></div>
 </div></div>
 <div id="modalWrap"><div id="modalBox"><div id="modalIcon">❓</div><div id="modalTitle"></div><div id="modalBody"></div><div class="modal-btns"><button class="modal-btn no" id="modalNo">Abbrechen</button><button class="modal-btn yes" id="modalYes">OK</button></div></div></div>
+<div id="bossWrap">
+  <div id="bossBox">
+    <div id="bossEmoji">😈</div>
+    <div id="bossName">Der Teufel</div>
+    <div id="bossTimer">⏰ Endet in: --:--</div>
+    <div id="bossHpWrap"><div id="bossHpBar" style="width:100%"></div></div>
+    <div id="bossHpText">-- / -- HP</div>
+    <div id="bossParticipants">👥 -- Spieler kämpfen</div>
+    <button id="bossClickBtn">⚔️ Angreifen!</button>
+    <div id="bossRewardBox"></div>
+    <button id="bossCloseBtn">✕ Schließen</button>
+  </div>
+</div>
 <div id="hatch"><div id="hatchEmoji">🥚</div><div id="hatchName">…</div><div id="hatchRare">…</div><div id="hatchTap">Tippen zum Fortfahren</div></div>
 <div id="authModal"><div class="auth-card">
   <h2>🐱 Emoji Klicker</h2>
@@ -261,7 +296,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const DB_PREFIX = "emojiClicker";
-const TABLES = { players: DB_PREFIX+"/players", accounts: DB_PREFIX+"/accounts", meta: DB_PREFIX+"/meta" };
+const TABLES = { players: DB_PREFIX+"/players", accounts: DB_PREFIX+"/accounts", meta: DB_PREFIX+"/meta", boss: DB_PREFIX+"/boss" };
 const playerPath = (id) => `${TABLES.players}/${id}`;
 const acctPath = (key) => `${TABLES.accounts}/${key}`;
 async function dbGet(p){ const s=await get(ref(db,p)); return s.val(); }
@@ -349,7 +384,7 @@ const UPGRADES = {
   click4:{id:"click4",emoji:"💥",name:"Mega-Klick",     unit:"pro Klick",  type:"click",base:1e7,    mult:1.18,per:4000, reb:9, order:7},
   idle4: {id:"idle4", emoji:"🏰",name:"Imperium",       unit:"pro Sekunde",type:"idle", base:5e7,    mult:1.21,per:3000, reb:12,order:8},
 };
-const BASE_CLICK=1, REBIRTH_BASE=5000, REBIRTH_SCALE=6.5, OFFLINE_CAP_H=8;
+const BASE_CLICK=1, REBIRTH_BASE=5000, REBIRTH_SCALE=6.5;
 const SESSION_KEY="ec_session";
 function freshState(){ return { coins:0, totalEarned:0, lifetimeEarned:0, totalClicks:0, rebirths:0, upgrades:{}, equipped:1, pets:{1:1}, gems:0, gemLevel:1, petXp:{}, createdAt:Date.now(), lastSeen:Date.now(), name:"" }; }
 let S = freshState();
@@ -427,8 +462,37 @@ async function login(user,pw){
   S=migrateState(Object.assign(freshState(), d||{})); S.pets=(d&&d.pets)||{1:1}; if(!PETS[S.equipped])S.equipped=1; S.name=acc.username;
   setSession(acc.playerId, acc.username); offlineEarnings(); save(true); afterAuth(); }
 function logout(){ showModal({ icon:"👋", title:"Abmelden?", body:"Dein Fortschritt wird gespeichert.", yes:"Abmelden", no:"Abbrechen", onYes:()=>{ save(true); localStorage.removeItem(SESSION_KEY); location.reload(); } }); }
-function offlineEarnings(){ const el=Math.min((Date.now()-(S.lastSeen||Date.now()))/1000, OFFLINE_CAP_H*3600);
-  if(el>30 && idlePerSec()>0){ const e=idlePerSec()*el; S.coins+=e; S.totalEarned+=e; S.lifetimeEarned+=e; dirty=true; toast(`💤 Willkommen zurück! +${fmt(e)}`); } }
+function offlineEarnings(){
+  const capSec = Math.max(1, S.rebirths) * 60;
+  const el=Math.min((Date.now()-(S.lastSeen||Date.now()))/1000, capSec);
+  if(el>10 && idlePerSec()>0){
+    const earned=idlePerSec()*el;
+    const hrs=Math.floor(el/3600), mins=Math.floor((el%3600)/60), secs=Math.floor(el%60);
+    const timeStr=hrs>0?`${hrs}h ${mins}m`:mins>0?`${mins}m ${secs}s`:`${secs}s`;
+    const pct=Math.min(100,el/capSec*100);
+    setTimeout(()=>{ showOfflineModal(earned, timeStr, pct, capSec); },600);
+  }
+}
+function showOfflineModal(earned, timeStr, pct, capSec){
+  const w=document.getElementById("modalWrap");
+  const fillColor=pct>=100?"#ffd700":pct>=60?"#7be39a":pct>=30?"#60b8ff":"#a0d8ff";
+  const jarFill=Math.round(pct);
+  const capMin=Math.round(capSec/60);
+  const capInfo=S.rebirths===0?"Max. 1 Min (0 Wiedergeburten)":`Max. ${capMin} Min (${S.rebirths}× Wiedergeburt)`;
+  document.getElementById("modalIcon").innerHTML=`
+    <div style="position:relative;display:inline-block;font-size:72px;line-height:1">
+      <span style="position:relative;z-index:1">🫙</span>
+      <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:36px;height:${Math.round(jarFill*0.38)}px;max-height:38px;background:${fillColor};border-radius:0 0 8px 8px;opacity:0.7;z-index:0;transition:height 0.8s"></div>
+    </div>`;
+  document.getElementById("modalTitle").textContent="Willkommen zurück! 👋";
+  document.getElementById("modalBody").textContent=`Du warst ${timeStr} weg.\nDein Glas hat sich gefüllt:\n\n+${fmt(earned)}\n\n${capInfo}`;
+  document.getElementById("modalYes").textContent="🫙 Einsammeln!";
+  document.getElementById("modalNo").textContent="Später";
+  w.classList.add("open");
+  const close=()=>w.classList.remove("open");
+  document.getElementById("modalYes").onclick=()=>{ close(); S.coins+=earned; S.totalEarned+=earned; S.lifetimeEarned+=earned; dirty=true; updateHud(); toast(`🫙 +${fmt(earned)} eingesammelt!`); };
+  document.getElementById("modalNo").onclick=()=>{ close(); };
+}
 function afterAuth(){ hideAuth(); document.getElementById("userChip").textContent="👤 "+currentUsername; loaded=true; renderAll(); startLoopsOnce(); }
 function boot(){
   const s=JSON.parse(localStorage.getItem(SESSION_KEY)||"null");
@@ -469,6 +533,110 @@ function doRebirth(){ const cost=rebirthCost(); if(S.totalEarned<cost){ toast(`�
   S.rebirths++; S.coins=0; S.upgrades={}; S.totalEarned=0; dirty=true;
   toast(`🔄 Wiedergeburt! Jetzt x${rebirthMult()} + neue Karten`); closePanel(); renderAll(); } }); }
 function renderAll(){ updateHud(); renderArena(); renderList(); }
+// ===== Boss System =====
+const BOSSES=[
+  {id:"devil", emoji:"😈",name:"Der Teufel",    hp:50000,  reward:[10,30]},
+  {id:"skull", emoji:"💀",name:"Der Reaper",    hp:120000, reward:[20,50]},
+  {id:"dragon",emoji:"🐲",name:"Feuer-Drache",  hp:300000, reward:[30,70]},
+  {id:"alien", emoji:"👾",name:"Alien-Overlord",hp:600000, reward:[50,100]},
+];
+let bossData=null, bossTimerInt=null;
+function getBossHour(){ return Math.floor(Date.now()/3600000); }
+function getBossId(hour){ return BOSSES[hour%BOSSES.length]; }
+async function checkBoss(){
+  const hour=getBossHour();
+  try{
+    const d=await dbGet(TABLES.boss);
+    if(d&&d.hour===hour){ bossData=d; showBossBadge(d.hp>0); }
+    else{
+      const bdef=getBossId(hour);
+      bossData={hour,id:bdef.id,emoji:bdef.emoji,name:bdef.name,maxHp:bdef.hp,hp:bdef.hp,reward:bdef.reward,participants:{},startedAt:Date.now()};
+      await dbUpdate(TABLES.boss,bossData); showBossBadge(true);
+    }
+  }catch(e){ console.error("Boss",e); }
+}
+function showBossBadge(show){
+  const b=document.getElementById("bossBadge");
+  if(show&&bossData&&bossData.hp>0){b.textContent="!";b.classList.add("show");}else b.classList.remove("show");
+}
+async function openBoss(){
+  await checkBoss();
+  if(!bossData){toast("⚠️ Boss nicht verfügbar");return;}
+  document.getElementById("bossWrap").classList.add("open");
+  renderBoss(); startBossTimer();
+}
+function closeBoss(){
+  document.getElementById("bossWrap").classList.remove("open");
+  if(bossTimerInt){clearInterval(bossTimerInt);bossTimerInt=null;}
+}
+function renderBoss(){
+  if(!bossData)return;
+  const pct=Math.max(0,bossData.hp/bossData.maxHp*100),alive=bossData.hp>0;
+  document.getElementById("bossEmoji").textContent=bossData.emoji;
+  document.getElementById("bossName").textContent=bossData.name;
+  document.getElementById("bossHpBar").style.width=pct+"%";
+  document.getElementById("bossHpBar").style.background=pct>50?"linear-gradient(90deg,#ff2060,#ff80a0)":pct>20?"linear-gradient(90deg,#ff8000,#ffb060)":"linear-gradient(90deg,#ff0000,#ff4040)";
+  document.getElementById("bossHpText").textContent=`${fmt(Math.max(0,bossData.hp))} / ${fmt(bossData.maxHp)} HP`;
+  const parts=Object.keys(bossData.participants||{}).length;
+  document.getElementById("bossParticipants").textContent=`👥 ${parts} Spieler kämpfen`;
+  document.getElementById("bossClickBtn").style.display=alive?"":"none";
+  if(!alive)showBossReward();
+}
+function showBossReward(){
+  const box=document.getElementById("bossRewardBox");
+  const myDmg=(bossData.participants&&bossData.participants[playerId])||0;
+  const total=Object.values(bossData.participants||{}).reduce((a,b)=>a+b,0)||1;
+  const contrib=Math.min(100,Math.round(myDmg/total*100));
+  const [rMin,rMax]=bossData.reward||[10,50];
+  const rewKey=`bossRew_${bossData.hour}`;
+  const claimed=localStorage.getItem(rewKey);
+  if(!claimed&&myDmg>0){
+    const dias=rMin+Math.floor(Math.random()*(rMax-rMin+1));
+    S.gems+=dias;dirty=true;updateGemBadge();localStorage.setItem(rewKey,"1");
+    box.style.display="";
+    box.innerHTML=`<div style="font-size:32px">🎉</div><div style="font-weight:800;font-size:18px;color:#ffd700">Boss besiegt!</div><div style="font-size:14px;color:rgba(255,255,255,0.85);margin-top:6px">Dein Anteil: ${contrib}%</div><div style="font-size:22px;font-weight:800;color:#60d0ff;margin-top:8px">+${dias} 💎</div>`;
+  }else if(myDmg===0){
+    box.style.display="";
+    box.innerHTML=`<div style="font-size:14px;color:rgba(255,255,255,0.6)">Du hast nicht mitgekämpft.</div>`;
+  }else{
+    box.style.display="";
+    box.innerHTML=`<div style="font-size:14px;color:rgba(255,255,255,0.6)">Belohnung bereits erhalten.</div>`;
+  }
+}
+function startBossTimer(){
+  if(bossTimerInt)clearInterval(bossTimerInt);
+  bossTimerInt=setInterval(async()=>{
+    const now=Date.now(),nextHour=Math.ceil(now/3600000)*3600000,rem=Math.max(0,nextHour-now);
+    const m=Math.floor(rem/60000),s=Math.floor((rem%60000)/1000);
+    document.getElementById("bossTimer").textContent=`⏰ Endet in: ${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    try{const d=await dbGet(TABLES.boss);if(d&&d.hour===getBossHour()){bossData=d;renderBoss();}}catch(e){}
+    if(rem<=0){closeBoss();setTimeout(checkBoss,2000);}
+  },3000);
+}
+async function doBossClick(){
+  if(!bossData||bossData.hp<=0||!playerId)return;
+  const dmg=Math.max(1,Math.floor(clickValue()));
+  const em=document.getElementById("bossEmoji");
+  em.classList.remove("hit");void em.offsetWidth;em.classList.add("hit");setTimeout(()=>em.classList.remove("hit"),200);
+  const box=document.getElementById("bossBox");
+  const f=document.createElement("div");f.style.cssText=`position:absolute;top:${80+Math.random()*40}px;left:${20+Math.random()*50}%;font-size:18px;font-weight:800;color:#ff80ff;pointer-events:none;-webkit-text-stroke:2px rgba(100,0,100,0.5);paint-order:stroke fill;animation:floatUp 0.8s ease-out forwards;z-index:10`;f.textContent="-"+fmt(dmg);box.appendChild(f);setTimeout(()=>f.remove(),800);
+  window._bossPendingDmg=(window._bossPendingDmg||0)+dmg;
+  if(!window._bossDebounce){
+    window._bossDebounce=setTimeout(async()=>{
+      window._bossDebounce=null;
+      const pending=window._bossPendingDmg||0;window._bossPendingDmg=0;
+      try{
+        const cur=await dbGet(TABLES.boss);
+        if(!cur||cur.hour!==getBossHour())return;
+        const newHp=Math.max(0,cur.hp-pending),parts=cur.participants||{};
+        parts[playerId]=(parts[playerId]||0)+pending;
+        await dbUpdate(TABLES.boss,{hp:newHp,participants:parts});
+        bossData={...cur,hp:newHp,participants:parts};renderBoss();
+        if(newHp<=0)showBossBadge(false);
+      }catch(e){}
+    },300);
+  }
+}
 const _earn=[];
 function trackEarn(v){ const now=Date.now(); _earn.push({t:now,v}); }
 function liveCps(){
@@ -632,11 +800,15 @@ function startLoopsOnce(){ if(loopsStarted) return; loopsStarted=true;
   setInterval(()=>{ const now=Date.now(),dt=(now-lastTick)/1000; lastTick=now; const inc=idlePerSec()*dt; if(inc>0){ S.coins+=inc; S.totalEarned+=inc; S.lifetimeEarned+=inc; trackEarn(inc); dirty=true; updateHud(); } },100);
   setInterval(()=>{ const i=idlePerSec(); if(i>0) spawnFloat("+$"+fmt(i),null,false); },1000);
   setInterval(()=>{ if(document.getElementById("list").children.length) renderList(); },600);
-  setInterval(()=>{ if(dirty) save(); },8000); }
+  setInterval(()=>{ if(dirty) save(); },8000);
+  checkBoss(); setInterval(checkBoss,60000); }
 document.getElementById("clicker").addEventListener("pointerdown",doClick);
 document.getElementById("petsBtn").onclick=()=>openPanel("pets");
 document.getElementById("eggsBtn").onclick=()=>openPanel("eggs");
 document.getElementById("lbBtn").onclick=()=>openPanel("lb");
+document.getElementById("bossBtn").onclick=()=>openBoss();
+document.getElementById("bossClickBtn").onclick=doBossClick;
+document.getElementById("bossCloseBtn").onclick=closeBoss;
 document.getElementById("panelClose").onclick=closePanel;
 document.getElementById("panelWrap").addEventListener("click",e=>{ if(e.target.id==="panelWrap")closePanel(); });
 document.getElementById("userChip").onclick=logout;
