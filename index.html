@@ -88,14 +88,14 @@ body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
 .up-card.rebirth .ttl{ color:#fff;font-size:24px;text-shadow:0 2px 0 rgba(0,0,0,0.25); }
 .up-card.rebirth .price{ background:linear-gradient(180deg,#b85a5a,#8f4242);border-color:#6e3030; }
 .up-card.rebirth .price.yes{ background:linear-gradient(180deg,#7be39a,var(--price-yes));border-color:var(--price-yes-edge); }
-/* ===== Breites Layout: Upgrade-Panel rechts (ab 600px — Foldable, Tablet, Desktop) ===== */
+/* ===== Breites Layout: Upgrade-Panel rechts (ab 600px) ===== */
 @media (min-width:600px){
   #app{ flex-direction:row;max-width:none;margin:0; }
   #main{ flex:1;min-width:0; }
   #dock{ width:420px;height:100%;border-left:5px solid var(--buybar-edge); }
   #buybar{ border-top:none; }
   #list{ max-height:none;flex:1; }
-  #sideBtns{ top:10px; }
+  #sideBtns{ top:10px;transform:none; }
   #clicker{ font-size:clamp(80px,18vw,160px); }
 }
 #panelWrap{ position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.55); }
@@ -141,6 +141,24 @@ body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
 .empty-note{ text-align:center;color:#2a2a44;opacity:0.7;font-weight:700;padding:24px 10px; }
 #toast{ position:fixed;top:74px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(0,0,0,0.82);color:#fff;padding:12px 22px;border-radius:14px;font-weight:700;z-index:50;opacity:0;transition:all 0.3s;pointer-events:none;border:2px solid rgba(255,255,255,0.2);text-align:center;max-width:90vw; }
 #toast.show{ opacity:1;transform:translateX(-50%) translateY(0); }
+/* ===== Diamant-Animation ===== */
+.gem-fly{ position:fixed;font-size:26px;pointer-events:none;z-index:100;transition:none;filter:drop-shadow(0 2px 6px rgba(100,180,255,0.8)); }
+@keyframes gemPop{ 0%{transform:scale(0) rotate(-20deg);opacity:1;} 20%{transform:scale(1.4) rotate(10deg);opacity:1;} 100%{transform:scale(0.8) rotate(0deg);opacity:0.9;} }
+#gemBadge{ position:absolute;top:-8px;right:-8px;background:linear-gradient(180deg,#60d0ff,#2090e0);color:#fff;font-size:11px;font-weight:800;border-radius:50%;min-width:22px;height:22px;display:none;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3); }
+#gemBadge.show{ display:flex; }
+/* ===== Custom Modal ===== */
+#modalWrap{ position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px); }
+#modalWrap.open{ display:flex; }
+#modalBox{ background:linear-gradient(180deg,#4a7fd8,#2a4f9f);border:4px solid #6aaff8;border-radius:24px;padding:28px 24px 20px;width:min(88vw,380px);box-shadow:0 20px 60px rgba(0,0,0,0.6);text-align:center;animation:modalPop 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes modalPop{ from{transform:scale(0.7);opacity:0;} to{transform:scale(1);opacity:1;} }
+#modalIcon{ font-size:52px;margin-bottom:8px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+#modalTitle{ font-size:22px;font-weight:800;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,0.3);margin-bottom:8px; }
+#modalBody{ font-size:15px;color:rgba(255,255,255,0.88);line-height:1.5;margin-bottom:20px;white-space:pre-line; }
+.modal-btns{ display:flex;gap:10px;justify-content:center; }
+.modal-btn{ flex:1;max-width:150px;padding:14px 10px;border-radius:14px;border:3px solid rgba(0,0,0,0.2);font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.25);transition:transform 0.1s; }
+.modal-btn:active{ transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,0.25); }
+.modal-btn.yes{ background:linear-gradient(180deg,#7be39a,#4caf70);color:#1a4a2a;border-color:#3a9a5a; }
+.modal-btn.no{ background:linear-gradient(180deg,#ff7a8c,#e23048);color:#fff;border-color:#b02038; }
 #hatch{ position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;background:rgba(0,0,0,0.78); }
 #hatch.open{ display:flex; }
 #hatchEmoji{ font-size:140px;animation:pop 0.5s ease-out;filter:drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
@@ -175,7 +193,7 @@ body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
     <div id="arena">
       <div id="sideBtns">
         <button class="side-btn" id="petsBtn">🐾</button>
-        <button class="side-btn" id="eggsBtn">🥚</button>
+        <button class="side-btn" id="eggsBtn" style="position:relative">🥚<span id="gemBadge"></span></button>
         <button class="side-btn" id="lbBtn">🏆</button>
       </div>
       <div id="clicker">🐱</div>
@@ -197,6 +215,7 @@ body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
   <div class="panel-head"><div class="panel-title" id="panelTitle">Pets</div><button class="close-btn" id="panelClose">✕</button></div>
   <div class="panel-body" id="panelBody"></div>
 </div></div>
+<div id="modalWrap"><div id="modalBox"><div id="modalIcon">❓</div><div id="modalTitle"></div><div id="modalBody"></div><div class="modal-btns"><button class="modal-btn no" id="modalNo">Abbrechen</button><button class="modal-btn yes" id="modalYes">OK</button></div></div></div>
 <div id="hatch"><div id="hatchEmoji">🥚</div><div id="hatchName">…</div><div id="hatchRare">…</div><div id="hatchTap">Tippen zum Fortfahren</div></div>
 <div id="authModal"><div class="auth-card">
   <h2>🐱 Emoji Klicker</h2>
@@ -280,11 +299,10 @@ const PETS = {
   702:{id:702,emoji:"🪐",name:"Planet",rarity:"Celestial",role:"multi",click:500000,idle:500000,mult:5.0},
 };
 const EGGS = {
-  basic:{emoji:"🥚",name:"Basis-Ei",cost:50,drops:{Common:75,Rare:22,Epic:3}},
-  golden:{emoji:"🪺",name:"Gold-Ei",cost:5000,drops:{Rare:50,Epic:38,Legendary:11,Mythic:1}},
-  cosmic:{emoji:"🌌",name:"Kosmos-Ei",cost:500000,drops:{Epic:40,Legendary:34,Mythic:18,God:6,Secret:1.9,Celestial:0.1}},
+  basic:{emoji:"🥚",name:"Basis-Ei",cost:1,drops:{Common:75,Rare:22,Epic:3}},
+  golden:{emoji:"🪺",name:"Gold-Ei",cost:5,drops:{Rare:50,Epic:38,Legendary:11,Mythic:1}},
+  cosmic:{emoji:"🌌",name:"Kosmos-Ei",cost:25,drops:{Epic:40,Legendary:34,Mythic:18,God:6,Secret:1.9,Celestial:0.1}},
 };
-/* Upgrades mit Rebirth-Freischaltung (reb) – mehr Karten je Wiedergeburt */
 const UPGRADES = {
   click1:{id:"click1",emoji:"👊",name:"Stärkere Klicks",unit:"pro Klick",  type:"click",base:15,    mult:1.15,per:2,    reb:0, order:1},
   idle1: {id:"idle1", emoji:"⏰",name:"Auto-Verdienst", unit:"pro Sekunde",type:"idle", base:60,    mult:1.18,per:1,    reb:0, order:2},
@@ -297,7 +315,7 @@ const UPGRADES = {
 };
 const BASE_CLICK=1, REBIRTH_BASE=5000, REBIRTH_SCALE=6.5, OFFLINE_CAP_H=8;
 const SESSION_KEY="ec_session";
-function freshState(){ return { coins:0, totalEarned:0, lifetimeEarned:0, totalClicks:0, rebirths:0, upgrades:{}, equipped:1, pets:{1:1}, createdAt:Date.now(), lastSeen:Date.now(), name:"" }; }
+function freshState(){ return { coins:0, totalEarned:0, lifetimeEarned:0, totalClicks:0, rebirths:0, upgrades:{}, equipped:1, pets:{1:1}, gems:0, createdAt:Date.now(), lastSeen:Date.now(), name:"" }; }
 let S = freshState();
 let playerId = null, currentUsername = "";
 let dirty=false, loaded=false, selMult="1", loopsStarted=false, authMode="login";
@@ -320,13 +338,13 @@ function buyInfo(uId){ const u=UPGRADES[uId], lvl=levelOf(u);
     while(S.coins>=cost+c && count<1000000){ cost+=c; count++; c=costAt(u,lvl+count); }
     if(count===0) return {count:0,cost:costAt(u,lvl)}; return {count,cost}; }
   const n=parseInt(selMult); let cost=0; for(let i=0;i<n;i++) cost+=costAt(u,lvl+i); return {count:n,cost}; }
-/* Migration alter Speicherstände: clickLevel/idleLevel -> upgrades-Map */
 function migrateState(s){
   if(!s.upgrades||typeof s.upgrades!=="object") s.upgrades={};
   if(typeof s.clickLevel==="number" && s.clickLevel>0) s.upgrades.click1=(s.upgrades.click1||0)+s.clickLevel;
   if(typeof s.idleLevel==="number" && s.idleLevel>0) s.upgrades.idle1=(s.upgrades.idle1||0)+s.idleLevel;
   delete s.clickLevel; delete s.idleLevel;
   if(typeof s.lifetimeEarned!=="number") s.lifetimeEarned=Math.max(s.totalEarned||0,0);
+  if(typeof s.gems!=="number") s.gems=0;
   return s;
 }
 function setSession(pid,user){ localStorage.setItem(SESSION_KEY, JSON.stringify({playerId:pid,username:user})); }
@@ -368,7 +386,7 @@ async function login(user,pw){
   let d=null; try{ d=await dbGet(playerPath(playerId)); }catch(e){}
   S=migrateState(Object.assign(freshState(), d||{})); S.pets=(d&&d.pets)||{1:1}; if(!PETS[S.equipped])S.equipped=1; S.name=acc.username;
   setSession(acc.playerId, acc.username); offlineEarnings(); save(true); afterAuth(); }
-function logout(){ if(!confirm("Abmelden?")) return; save(true); localStorage.removeItem(SESSION_KEY); location.reload(); }
+function logout(){ showModal({ icon:"👋", title:"Abmelden?", body:"Dein Fortschritt wird gespeichert.", yes:"Abmelden", no:"Abbrechen", onYes:()=>{ save(true); localStorage.removeItem(SESSION_KEY); location.reload(); } }); }
 function offlineEarnings(){ const el=Math.min((Date.now()-(S.lastSeen||Date.now()))/1000, OFFLINE_CAP_H*3600);
   if(el>30 && idlePerSec()>0){ const e=idlePerSec()*el; S.coins+=e; S.totalEarned+=e; S.lifetimeEarned+=e; dirty=true; toast(`💤 Willkommen zurück! +${fmt(e)}`); } }
 function afterAuth(){ hideAuth(); document.getElementById("userChip").textContent="👤 "+currentUsername; loaded=true; renderAll(); startLoopsOnce(); }
@@ -382,11 +400,12 @@ function boot(){
   } else { showAuth(); } }
 async function save(force){ if(!playerId) return; if(!loaded&&!force) return; S.lastSeen=Date.now();
   try{ await dbUpdate(playerPath(playerId),{ name:S.name,coins:S.coins,totalEarned:S.totalEarned,lifetimeEarned:S.lifetimeEarned,totalClicks:S.totalClicks,
-    rebirths:S.rebirths,upgrades:S.upgrades,equipped:S.equipped,pets:S.pets,createdAt:S.createdAt,lastSeen:S.lastSeen });
+    rebirths:S.rebirths,upgrades:S.upgrades,equipped:S.equipped,pets:S.pets,gems:S.gems,createdAt:S.createdAt,lastSeen:S.lastSeen });
     dirty=false; }catch(e){ console.error(e); } }
-function doClick(ev){ const v=clickValue(); S.coins+=v; S.totalEarned+=v; S.lifetimeEarned+=v; S.totalClicks++; dirty=true;
+function doClick(ev){ const v=clickValue(); S.coins+=v; S.totalEarned+=v; S.lifetimeEarned+=v; S.totalClicks++; trackEarn(v); dirty=true;
   const el=document.getElementById("clicker"); el.classList.remove("squash"); void el.offsetWidth; el.classList.add("squash");
-  spawnFloat("+$"+fmt(v), ev, true); updateHud(); }
+  spawnFloat("+$"+fmt(v), ev, true); updateHud();
+  if(Math.random()<0.02){ S.gems++; dirty=true; spawnGem(ev); updateGemBadge(); } }
 function spawnFloat(txt, ev, isClick){ const f=document.createElement("div"); f.className="float"+(isClick?" click":""); f.textContent=txt;
   const arena=document.getElementById("arena"), r=arena.getBoundingClientRect();
   const x= ev? ev.clientX-r.left : r.width/2 + (Math.random()*80-40); const y= ev? ev.clientY-r.top : r.height/2 - 40;
@@ -395,8 +414,8 @@ function buyUpgrade(uId){ const u=UPGRADES[uId]; if(!isUnlocked(u)) return;
   const {count,cost}=buyInfo(uId);
   if(count<=0||S.coins<cost){ toast("❌ Nicht genug Münzen"); return; }
   S.coins-=cost; S.upgrades[uId]=(S.upgrades[uId]||0)+count; dirty=true; updateHud(); renderList(); }
-function buyEgg(eggId){ const egg=EGGS[eggId]; if(S.coins<egg.cost){ toast("❌ Nicht genug Münzen"); return; }
-  S.coins-=egg.cost; dirty=true;
+function buyEgg(eggId){ const egg=EGGS[eggId]; if(S.gems<egg.cost){ toast("❌ Nicht genug 💎 Diamanten"); return; }
+  S.gems-=egg.cost; dirty=true; updateGemBadge();
   const total=Object.values(egg.drops).reduce((a,b)=>a+b,0); let roll=Math.random()*total, rar="Common";
   for(const [r,w] of Object.entries(egg.drops)){ roll-=w; if(roll<=0){ rar=r; break; } }
   const pool=Object.values(PETS).filter(p=>p.rarity===rar); const pet=pool[Math.floor(Math.random()*pool.length)];
@@ -405,11 +424,35 @@ function buyEgg(eggId){ const egg=EGGS[eggId]; if(S.coins<egg.cost){ toast("❌ 
   updateHud(); renderArena(); showHatch(pet); }
 function equipPet(id){ if(!S.pets[id])return; S.equipped=Number(id); dirty=true; renderArena(); renderPets(); }
 function doRebirth(){ const cost=rebirthCost(); if(S.totalEarned<cost){ toast(`❌ Brauchst ${fmt(cost)} gesamt`); return; }
-  if(!confirm(`Wiedergeburt #${S.rebirths+1}?\n\nMünzen & Upgrades werden zurückgesetzt.\nPets bleiben. Multiplikator danach: x${S.rebirths+2}\n\nNeue Upgrade-Karten werden freigeschaltet!`)) return;
+  showModal({ icon:"🔄", title:`Wiedergeburt #${S.rebirths+1}`, body:`Münzen & Upgrades werden zurückgesetzt.\nPets bleiben erhalten.\nMultiplikator danach: x${S.rebirths+2}\n\n✨ Neue Upgrade-Karten werden freigeschaltet!`, yes:"Wiedergeburt!", no:"Abbrechen", onYes:()=>{
   S.rebirths++; S.coins=0; S.upgrades={}; S.totalEarned=0; dirty=true;
-  toast(`🔄 Wiedergeburt! Jetzt x${rebirthMult()} + neue Karten`); closePanel(); renderAll(); }
+  toast(`🔄 Wiedergeburt! Jetzt x${rebirthMult()} + neue Karten`); closePanel(); renderAll(); } }); }
 function renderAll(){ updateHud(); renderArena(); renderList(); }
-function updateHud(){ document.getElementById("cps").textContent = fmt(idlePerSec())+"/s"; document.getElementById("money").textContent = fmt(S.coins); }
+const _earn=[];
+function trackEarn(v){ const now=Date.now(); _earn.push({t:now,v}); }
+function liveCps(){
+  const now=Date.now(), cutoff=now-1000;
+  while(_earn.length && _earn[0].t < cutoff) _earn.shift();
+  return _earn.reduce((s,e)=>s+e.v, 0);
+}
+function updateGemBadge(){ const b=document.getElementById("gemBadge"); if(S.gems>0){ b.textContent=S.gems>99?"99+":S.gems; b.classList.add("show"); } else b.classList.remove("show"); }
+function spawnGem(ev){
+  const btn=document.getElementById("eggsBtn");
+  const bR=btn.getBoundingClientRect();
+  const destX=bR.left+bR.width/2, destY=bR.top+bR.height/2;
+  const startX=ev?ev.clientX:window.innerWidth/2, startY=ev?ev.clientY:window.innerHeight/2;
+  const gem=document.createElement("div"); gem.className="gem-fly"; gem.textContent="💎";
+  gem.style.cssText=`left:${startX-14}px;top:${startY-14}px;`;
+  document.body.appendChild(gem);
+  gem.style.animation="gemPop 0.3s ease-out forwards";
+  setTimeout(()=>{
+    gem.style.transition="left 0.55s cubic-bezier(0.4,0,0.2,1),top 0.55s cubic-bezier(0.4,0,0.2,1),opacity 0.2s 0.45s,transform 0.55s";
+    gem.style.left=(destX-14)+"px"; gem.style.top=(destY-14)+"px";
+    gem.style.transform="scale(0.4)";
+    setTimeout(()=>{ gem.style.opacity="0"; setTimeout(()=>gem.remove(),200); },450);
+  },300);
+}
+function updateHud(){ const c=Math.max(liveCps(), idlePerSec()); document.getElementById("cps").textContent = fmt(c)+"/s"; document.getElementById("money").textContent = fmt(S.coins); }
 function renderArena(){ document.getElementById("clicker").textContent = equippedPet().emoji; }
 function renderList(){ const list=document.getElementById("list"); const rc=rebirthCost(), rReady=S.totalEarned>=rc;
   let html = `<div class="up-card rebirth"><div class="iconbox">🔄<div class="badge">${S.rebirths}</div></div>
@@ -445,10 +488,15 @@ function renderPets(){ const body=document.getElementById("panelBody");
         ${eq?`<div class="eb" style="background:linear-gradient(180deg,#cfcfe0,#9a9ab8);color:#2a2a44">Aktiv ✓</div>`:""}</div>`; }).join("")+`</div>`;
   body.querySelectorAll("[data-equip]").forEach(b=>b.onclick=()=>equipPet(b.dataset.equip)); }
 function renderEggs(){ const body=document.getElementById("panelBody");
-  body.innerHTML=Object.entries(EGGS).map(([id,egg])=>{ const afford=S.coins>=egg.cost, tot=Object.values(egg.drops).reduce((a,b)=>a+b,0);
+  const gemBar=`<div style="text-align:center;background:linear-gradient(180deg,rgba(96,208,255,0.25),rgba(32,144,224,0.15));border:3px solid rgba(96,208,255,0.5);border-radius:16px;padding:14px;margin-bottom:14px;">
+    <div style="font-size:42px;filter:drop-shadow(0 2px 8px rgba(100,200,255,0.8))">💎</div>
+    <div style="font-size:28px;font-weight:800;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,0.3)">${S.gems} Diamanten</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:4px">2% Chance beim Klicken • Zum Eier öffnen</div>
+  </div>`;
+  body.innerHTML=gemBar+Object.entries(EGGS).map(([id,egg])=>{ const afford=S.gems>=egg.cost, tot=Object.values(egg.drops).reduce((a,b)=>a+b,0);
     const drops=Object.entries(egg.drops).map(([r,w])=>`${RARITIES[r].label} ${(w/tot*100).toFixed(w<1?1:0)}%`).join(" · ");
     return `<div class="egg-row"><div class="ico">${egg.emoji}</div><div class="mid"><div class="rt">${egg.name}</div><div class="drops">${drops}</div></div>
-      <button class="eggbuy" data-egg="${id}" ${afford?"":"disabled"}>💰 ${fmt(egg.cost)}</button></div>`; }).join("");
+      <button class="eggbuy" data-egg="${id}" ${afford?"":"disabled"}>💎 ${egg.cost}</button></div>`; }).join("");
   body.querySelectorAll("[data-egg]").forEach(b=>b.onclick=()=>{ buyEgg(b.dataset.egg); renderEggs(); }); }
 function renderRebirth(){ const body=document.getElementById("panelBody"); const cost=rebirthCost(), ready=S.totalEarned>=cost;
   const pct=Math.min(100,S.totalEarned/cost*100);
@@ -481,9 +529,21 @@ function showHatch(pet){ const r=RARITIES[pet.rarity]; document.getElementById("
   const h=document.getElementById("hatch"); h.classList.add("open");
   const close=()=>{ h.classList.remove("open"); h.removeEventListener("click",close); }; setTimeout(()=>h.addEventListener("click",close),250); }
 let toastT; function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
+function showModal({ icon="❓", title="", body="", yes="OK", no="Abbrechen", onYes=null, onNo=null }={}){
+  const w=document.getElementById("modalWrap");
+  document.getElementById("modalIcon").textContent=icon;
+  document.getElementById("modalTitle").textContent=title;
+  document.getElementById("modalBody").textContent=body;
+  document.getElementById("modalYes").textContent=yes;
+  document.getElementById("modalNo").textContent=no;
+  w.classList.add("open");
+  const close=()=>w.classList.remove("open");
+  document.getElementById("modalYes").onclick=()=>{ close(); if(onYes) onYes(); };
+  document.getElementById("modalNo").onclick=()=>{ close(); if(onNo) onNo(); };
+}
 function startLoopsOnce(){ if(loopsStarted) return; loopsStarted=true;
   let lastTick=Date.now();
-  setInterval(()=>{ const now=Date.now(),dt=(now-lastTick)/1000; lastTick=now; const inc=idlePerSec()*dt; if(inc>0){ S.coins+=inc; S.totalEarned+=inc; S.lifetimeEarned+=inc; dirty=true; updateHud(); } },100);
+  setInterval(()=>{ const now=Date.now(),dt=(now-lastTick)/1000; lastTick=now; const inc=idlePerSec()*dt; if(inc>0){ S.coins+=inc; S.totalEarned+=inc; S.lifetimeEarned+=inc; trackEarn(inc); dirty=true; updateHud(); } },100);
   setInterval(()=>{ const i=idlePerSec(); if(i>0) spawnFloat("+$"+fmt(i),null,false); },1000);
   setInterval(()=>{ if(document.getElementById("list").children.length) renderList(); },600);
   setInterval(()=>{ if(dirty) save(); },8000); }
