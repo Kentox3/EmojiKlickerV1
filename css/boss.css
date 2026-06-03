@@ -3,8 +3,9 @@
 #bossBadge.show{ display:flex; }
 @keyframes bossping{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.25);box-shadow:0 2px 14px rgba(255,60,60,0.8);} }
 #bossOverlay{ position:fixed;inset:0;z-index:30;display:none;flex-direction:column;
-  background:linear-gradient(180deg,#1a0030,#0d0018);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='%23ff00ff' fill-opacity='0.04'%3E%3Cpolygon points='10,8 22,8 16,20'/%3E%3Cpolygon points='50,44 62,44 56,56'/%3E%3C/g%3E%3C/svg%3E"); }
+  background-color:#1a0030;
+  background-image:linear-gradient(180deg,#1a0030,#0d0018),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='%23ff00ff' fill-opacity='0.04'%3E%3Cpolygon points='10,8 22,8 16,20'/%3E%3Cpolygon points='50,44 62,44 56,56'/%3E%3C/g%3E%3C/svg%3E");
+  background-blend-mode:normal,normal; }
 #bossOverlay.open{ display:flex; }
 #bossTopBar{ display:flex;align-items:center;justify-content:space-between;padding:14px 18px 0; }
 #bossTopLeft{ display:flex;align-items:center;gap:10px; }
