@@ -88,7 +88,8 @@ async function register(user,pw){
   if(existing) throw "Benutzername schon vergeben";
   const {salt,hash}=await hashPassword(pw); const pid=genId();
   await dbUpdate(acctPath(key), { username:user, salt, hash, playerId:pid, createdAt:Date.now() });
-  playerId=pid; currentUsername=user; S=freshState(); S.name=user;
+  playerId=pid; currentUsername=user;
+  Object.keys(S).forEach(k=>delete S[k]); Object.assign(S, freshState()); S.name=user;
   setSession(pid,user); await save(true); afterAuth(); }
 async function login(user,pw){
   const key=user.toLowerCase(); let acc=null;
@@ -98,7 +99,9 @@ async function login(user,pw){
   if(hash!==acc.hash) throw "Falsches Passwort";
   playerId=acc.playerId; currentUsername=acc.username;
   let d=null; try{ d=await dbGet(playerPath(playerId)); }catch(e){}
-  S=migrateState(Object.assign(freshState(), d||{})); S.pets=(d&&d.pets)||{1:1}; if(!PETS[S.equipped])S.equipped=1; S.name=acc.username;
+  const migrated2=migrateState(Object.assign(freshState(), d||{}));
+  Object.keys(S).forEach(k=>delete S[k]); Object.assign(S, migrated2);
+  if(d&&d.pets) S.pets=d.pets; if(!PETS[S.equipped])S.equipped=1; S.name=acc.username;
   setSession(acc.playerId, acc.username); offlineEarnings(); save(true); afterAuth(); }
 function logout(){ showModal({ icon:"👋", title:"Abmelden?", body:"Dein Fortschritt wird gespeichert.", yes:"Abmelden", no:"Abbrechen", onYes:()=>{ save(true); localStorage.removeItem(SESSION_KEY); location.reload(); } }); }
 function offlineEarnings(){
@@ -152,13 +155,18 @@ function boot(){
         try{
           d=await dbGet(playerPath(playerId));
           console.log('[boot] Firebase data loaded:', d ? 'OK ('+Object.keys(d).length+' keys)' : 'null/empty');
+          console.log('[boot] keys:', d ? Object.keys(d) : []);
+          console.log('[boot] coins:', d?.coins, 'rebirths:', d?.rebirths, 'pets:', d?.pets);
         }catch(e){
           console.error('[boot] Firebase error:', e);
           toast("⚠️ Verbindungsfehler – lokaler Stand");
         }
         setLoadStatus('Initialisiere…', 85);
         if(d){
-          S=migrateState(Object.assign(freshState(), d));
+          const migrated = migrateState(Object.assign(freshState(), d));
+          // S in-place überschreiben damit alle anderen Scripts dieselbe Referenz nutzen
+          Object.keys(S).forEach(k=>delete S[k]);
+          Object.assign(S, migrated);
           if(d.pets) S.pets=d.pets;
           if(!PETS[S.equipped]) S.equipped=1;
         }

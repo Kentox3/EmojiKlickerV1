@@ -1,8 +1,8 @@
 // state.js — Spielzustand, Berechnungsfunktionen
 function freshState(){ return { coins:0, totalEarned:0, lifetimeEarned:0, totalClicks:0, rebirths:0, upgrades:{}, equipped:1, pets:{1:1}, gems:0, gemLevel:1, petXp:{}, slayerXp:0, skills:{}, createdAt:Date.now(), lastSeen:Date.now(), name:"" }; }
-let S = freshState();
-let playerId = null, currentUsername = "";
-let dirty=false, loaded=false, selMult="1", loopsStarted=false, authMode="login";
+var S = freshState();
+var playerId = null, currentUsername = "";
+var dirty=false, loaded=false, selMult="1", loopsStarted=false, authMode="login";
 const rebirthMult=()=>1+S.rebirths;
 const equippedPet=()=>PETS[S.equipped]||PETS[1];
 function sumType(type){ let s=0; for(const u of Object.values(UPGRADES)){ if(u.type===type) s+=((S.upgrades&&S.upgrades[u.id])||0)*u.per; } return s; }
