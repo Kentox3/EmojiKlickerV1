@@ -535,10 +535,10 @@ function doRebirth(){ const cost=rebirthCost(); if(S.totalEarned<cost){ toast(`�
 function renderAll(){ updateHud(); renderArena(); renderList(); }
 // ===== Boss System =====
 const BOSSES=[
-  {id:"devil", emoji:"😈",name:"Der Teufel",    hp:50000,  reward:[10,30]},
-  {id:"skull", emoji:"💀",name:"Der Reaper",    hp:120000, reward:[20,50]},
-  {id:"dragon",emoji:"🐲",name:"Feuer-Drache",  hp:300000, reward:[30,70]},
-  {id:"alien", emoji:"👾",name:"Alien-Overlord",hp:600000, reward:[50,100]},
+  {id:"devil", emoji:"😈",name:"Der Teufel",    hp:500000,   rewardMin:10, rewardMax:30},
+  {id:"skull", emoji:"💀",name:"Der Reaper",    hp:1500000,  rewardMin:20, rewardMax:50},
+  {id:"dragon",emoji:"🐲",name:"Feuer-Drache",  hp:5000000,  rewardMin:30, rewardMax:70},
+  {id:"alien", emoji:"👾",name:"Alien-Overlord",hp:15000000, rewardMin:50, rewardMax:100},
 ];
 let bossData=null, bossTimerInt=null;
 function getBossHour(){ return Math.floor(Date.now()/3600000); }
@@ -550,7 +550,7 @@ async function checkBoss(){
     if(d&&d.hour===hour){ bossData=d; showBossBadge(d.hp>0); }
     else{
       const bdef=getBossId(hour);
-      bossData={hour,id:bdef.id,emoji:bdef.emoji,name:bdef.name,maxHp:bdef.hp,hp:bdef.hp,reward:bdef.reward,participants:{},startedAt:Date.now()};
+      bossData={hour,id:bdef.id,emoji:bdef.emoji,name:bdef.name,maxHp:bdef.hp,hp:bdef.hp,rewardMin:bdef.rewardMin,rewardMax:bdef.rewardMax,participants:{},startedAt:Date.now()};
       await dbUpdate(TABLES.boss,bossData); showBossBadge(true);
     }
   }catch(e){ console.error("Boss",e); }
@@ -580,14 +580,14 @@ function renderBoss(){
   const parts=Object.keys(bossData.participants||{}).length;
   document.getElementById("bossParticipants").textContent=`👥 ${parts} Spieler kämpfen`;
   document.getElementById("bossClickBtn").style.display=alive?"":"none";
-  if(!alive)showBossReward();
+  if(!alive){ if(bossTimerInt){clearInterval(bossTimerInt);bossTimerInt=null;} document.getElementById("bossTimer").textContent="☠️ Boss besiegt!"; showBossReward(); }
 }
 function showBossReward(){
   const box=document.getElementById("bossRewardBox");
   const myDmg=(bossData.participants&&bossData.participants[playerId])||0;
   const total=Object.values(bossData.participants||{}).reduce((a,b)=>a+b,0)||1;
   const contrib=Math.min(100,Math.round(myDmg/total*100));
-  const [rMin,rMax]=bossData.reward||[10,50];
+  const [rMin,rMax]=[bossData.rewardMin||10, bossData.rewardMax||30];
   const rewKey=`bossRew_${bossData.hour}`;
   const claimed=localStorage.getItem(rewKey);
   if(!claimed&&myDmg>0){
@@ -742,7 +742,7 @@ function renderEggs(){ const body=document.getElementById("panelBody");
     <div style="font-size:42px;filter:drop-shadow(0 2px 8px rgba(100,200,255,0.8))">💎</div>
     <div style="font-size:28px;font-weight:800;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,0.3)">${S.gems} Diamanten</div>
     <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px">Chance: ${gemChance().toFixed(1)}% pro Klick</div>
-    <button onclick="upgradeGemLevel()" style="margin-top:10px;width:100%;padding:12px;border-radius:13px;border:3px solid ${canUp?'#3a9a5a':maxed?'#4a6a8a':'#6e3d3d'};font-family:inherit;font-size:15px;font-weight:800;cursor:${canUp||maxed?'pointer':'not-allowed'};box-shadow:0 4px 0 rgba(0,0,0,0.25);
+    <button id="gemUpgradeBtn" style="margin-top:10px;width:100%;padding:12px;border-radius:13px;border:3px solid ${canUp?'#3a9a5a':maxed?'#4a6a8a':'#6e3d3d'};font-family:inherit;font-size:15px;font-weight:800;cursor:${canUp||maxed?'pointer':'not-allowed'};box-shadow:0 4px 0 rgba(0,0,0,0.25);
       background:linear-gradient(180deg,${canUp?'#7be39a,#4caf70':maxed?'#60a0d0,#3070a0':'#c08a8a,#a86a6a'});color:${canUp?'#1a4a2a':'#fff'}">
       ${maxed?'✨ Max. Level erreicht':`⬆️ Glück Lv.${S.gemLevel}→${S.gemLevel+1} · 💎${nextCost}`}
     </button>
@@ -751,7 +751,8 @@ function renderEggs(){ const body=document.getElementById("panelBody");
     const drops=Object.entries(egg.drops).map(([r,w])=>`${RARITIES[r].label} ${(w/tot*100).toFixed(w<1?1:0)}%`).join(" · ");
     return `<div class="egg-row"><div class="ico">${egg.emoji}</div><div class="mid"><div class="rt">${egg.name}</div><div class="drops">${drops}</div></div>
       <button class="eggbuy" data-egg="${id}" ${afford?"":"disabled"}>💎 ${egg.cost}</button></div>`; }).join("");
-  body.querySelectorAll("[data-egg]").forEach(b=>b.onclick=()=>{ buyEgg(b.dataset.egg); renderEggs(); }); }
+  body.querySelectorAll("[data-egg]").forEach(b=>b.onclick=()=>{ buyEgg(b.dataset.egg); renderEggs(); });
+  const gu=body.querySelector("#gemUpgradeBtn"); if(gu&&!maxed) gu.onclick=upgradeGemLevel; }
 function renderRebirth(){ const body=document.getElementById("panelBody"); const cost=rebirthCost(), ready=S.totalEarned>=cost;
   const pct=Math.min(100,S.totalEarned/cost*100);
   const nextUnlock=Object.values(UPGRADES).filter(u=>u.reb===S.rebirths+1).map(u=>u.emoji+" "+u.name);
