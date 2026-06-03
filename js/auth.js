@@ -135,19 +135,27 @@ function showOfflineModal(earned, timeStr, pct, capSec){
 function afterAuth(){ hideAuth(); document.getElementById("userChip").textContent="👤 "+currentUsername; loaded=true; renderAll(); startLoopsOnce(); hideLoadScreen(); }
 function boot(){
   startLoadSim();
-  setLoadStatus('Prüfe Sitzung…', 15);
-  const s=JSON.parse(localStorage.getItem(SESSION_KEY)||"null");
-  if(s&&s.playerId&&s.username){
-    playerId=s.playerId; currentUsername=s.username;
-    (async()=>{
-      setLoadStatus('Lade Spielstand…', 50);
-      let d=null; try{ d=await dbGet(playerPath(playerId)); }catch(e){ toast("⚠️ Offline – nur lokal"); }
-      setLoadStatus('Initialisiere…', 85);
-      S=migrateState(Object.assign(freshState(), d||{})); S.pets=(d&&d.pets)||{1:1}; if(!PETS[S.equipped])S.equipped=1; S.name=currentUsername;
-      offlineEarnings(); afterAuth(); save(true);
-    })();
-  } else {
-    setLoadStatus('Bereit!', 100);
-    setTimeout(()=>{ hideLoadScreen(); showAuth(); }, 500);
+  setLoadStatus('Verbinde mit Firebase…', 15);
+  // Warte bis Firebase-Modul fertig geladen ist
+  function waitForFirebase(cb){
+    if(window._firebaseReady) cb();
+    else document.addEventListener('firebaseReady', cb, {once:true});
   }
+  waitForFirebase(()=>{
+    setLoadStatus('Prüfe Sitzung…', 30);
+    const s=JSON.parse(localStorage.getItem(SESSION_KEY)||"null");
+    if(s&&s.playerId&&s.username){
+      playerId=s.playerId; currentUsername=s.username;
+      (async()=>{
+        setLoadStatus('Lade Spielstand…', 55);
+        let d=null; try{ d=await dbGet(playerPath(playerId)); }catch(e){ toast("⚠️ Offline – nur lokal"); }
+        setLoadStatus('Initialisiere…', 85);
+        S=migrateState(Object.assign(freshState(), d||{})); S.pets=(d&&d.pets)||{1:1}; if(!PETS[S.equipped])S.equipped=1; S.name=currentUsername;
+        offlineEarnings(); afterAuth(); save(true);
+      })();
+    } else {
+      setLoadStatus('Bereit!', 100);
+      setTimeout(()=>{ hideLoadScreen(); showAuth(); }, 500);
+    }
+  });
 }

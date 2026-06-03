@@ -30,3 +30,5 @@ window.hashPassword = hashPassword;
 window.TABLES = TABLES;
 window.playerPath = playerPath;
 window.acctPath = acctPath;
+window._firebaseReady = true;
+document.dispatchEvent(new Event('firebaseReady'));
