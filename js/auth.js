@@ -148,9 +148,21 @@ function boot(){
       playerId=s.playerId; currentUsername=s.username;
       (async()=>{
         setLoadStatus('Lade Spielstand…', 55);
-        let d=null; try{ d=await dbGet(playerPath(playerId)); }catch(e){ toast("⚠️ Offline – nur lokal"); }
+        let d=null;
+        try{
+          d=await dbGet(playerPath(playerId));
+          console.log('[boot] Firebase data loaded:', d ? 'OK ('+Object.keys(d).length+' keys)' : 'null/empty');
+        }catch(e){
+          console.error('[boot] Firebase error:', e);
+          toast("⚠️ Verbindungsfehler – lokaler Stand");
+        }
         setLoadStatus('Initialisiere…', 85);
-        S=migrateState(Object.assign(freshState(), d||{})); S.pets=(d&&d.pets)||{1:1}; if(!PETS[S.equipped])S.equipped=1; S.name=currentUsername;
+        if(d){
+          S=migrateState(Object.assign(freshState(), d));
+          if(d.pets) S.pets=d.pets;
+          if(!PETS[S.equipped]) S.equipped=1;
+        }
+        S.name=currentUsername;
         offlineEarnings(); afterAuth(); save(true);
       })();
     } else {
