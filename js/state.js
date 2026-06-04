@@ -1,5 +1,5 @@
 // state.js — Spielzustand, Berechnungsfunktionen
-function freshState(){ return { coins:0, totalEarned:0, lifetimeEarned:0, totalClicks:0, rebirths:0, upgrades:{}, equipped:1, pets:{1:1}, gems:0, gemLevel:1, petXp:{}, slayerXp:0, skills:{}, createdAt:Date.now(), lastSeen:Date.now(), name:"" }; }
+function freshState(){ return { coins:0, totalEarned:0, lifetimeEarned:0, totalClicks:0, rebirths:0, upgrades:{}, equipped:1, pets:{1:1}, gems:0, gemLevel:1, petXp:{}, slayerXp:0, skills:{}, bossKills:0, bossDmgDealt:0, bossParticipations:0, createdAt:Date.now(), lastSeen:Date.now(), name:"" }; }
 var S = freshState();
 var playerId = null, currentUsername = "";
 var dirty=false, loaded=false, selMult="1", loopsStarted=false, authMode="login";
@@ -29,5 +29,11 @@ function migrateState(s){
   if(!s.petXp||typeof s.petXp!=="object") s.petXp={};
   if(typeof s.slayerXp!=="number") s.slayerXp=0;
   if(!s.skills||typeof s.skills!=="object") s.skills={};
+  // Reset alte Skill-IDs bei System-Wechsel
+  const oldSkillIds=["dmgBoost1","dmgBoost2","dmgBoost3","gemBonus1","gemBonus2","gemBonus3","clickBoost"];
+  if(s.skills&&oldSkillIds.some(id=>s.skills[id])) s.skills={};
+  if(typeof s.bossKills!=="number") s.bossKills=0;
+  if(typeof s.bossDmgDealt!=="number") s.bossDmgDealt=0;
+  if(typeof s.bossParticipations!=="number") s.bossParticipations=0;
   return s;
 }

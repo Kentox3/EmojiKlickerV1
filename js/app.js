@@ -1,6 +1,6 @@
 // app.js — Event Listener & Boot
 document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById("clicker").addEventListener("pointerdown",doClick);
+  document.getElementById("clicker").addEventListener("pointerdown", e=>{ e.preventDefault(); doClick(e); });
   document.getElementById("petsBtn").onclick=()=>openPanel("pets");
   document.getElementById("eggsBtn").onclick=()=>openPanel("eggs");
   document.getElementById("lbBtn").onclick=()=>openPanel("lb");

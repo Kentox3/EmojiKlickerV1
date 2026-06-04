@@ -1,7 +1,7 @@
 // game.js — Speichern, Klicken, Kaufen, Wiedergeburt
 async function save(force){ if(!playerId) return; if(!loaded&&!force) return; S.lastSeen=Date.now();
   try{ await dbUpdate(playerPath(playerId),{ name:S.name,coins:S.coins,totalEarned:S.totalEarned,lifetimeEarned:S.lifetimeEarned,totalClicks:S.totalClicks,
-    rebirths:S.rebirths,upgrades:S.upgrades,equipped:S.equipped,pets:S.pets,gems:S.gems,gemLevel:S.gemLevel,petXp:S.petXp,slayerXp:S.slayerXp,skills:S.skills,createdAt:S.createdAt,lastSeen:S.lastSeen });
+    rebirths:S.rebirths,upgrades:S.upgrades,equipped:S.equipped,pets:S.pets,gems:S.gems,gemLevel:S.gemLevel,petXp:S.petXp,slayerXp:S.slayerXp,skills:S.skills,bossKills:S.bossKills,bossDmgDealt:S.bossDmgDealt,bossParticipations:S.bossParticipations,createdAt:S.createdAt,lastSeen:S.lastSeen });
     dirty=false; }catch(e){ console.error(e); } }
 function doClick(ev){ const v=clickValue(); S.coins+=v; S.totalEarned+=v; S.lifetimeEarned+=v; S.totalClicks++; trackEarn(v); dirty=true;
   const el=document.getElementById("clicker"); el.classList.remove("squash"); void el.offsetWidth; el.classList.add("squash");
@@ -25,7 +25,7 @@ function buyEgg(eggId){ const egg=EGGS[eggId]; if(S.gems<egg.cost){ toast("❌ N
   if(RARITIES[pet.rarity].order>RARITIES[equippedPet().rarity].order) S.equipped=pet.id;
   updateHud(); renderArena(); showHatch(pet); }
 function equipPet(id){ if(!S.pets[id])return; S.equipped=Number(id); dirty=true; renderArena(); renderPets(); }
-function doRebirth(){ const cost=rebirthCost(); if(S.totalEarned<cost){ toast(`❌ Brauchst ${fmt(cost)} gesamt`); return; }
+function doRebirth(){ const cost=rebirthCost(); if(S.coins<cost){ toast(`❌ Brauchst ${fmt(cost)} Münzen`); return; }
   showModal({ icon:"🔄", title:`Wiedergeburt #${S.rebirths+1}`, body:`Münzen & Upgrades werden zurückgesetzt.\nPets bleiben erhalten.\nMultiplikator danach: x${S.rebirths+2}\n\n✨ Neue Upgrade-Karten werden freigeschaltet!`, yes:"Wiedergeburt!", no:"Abbrechen", onYes:()=>{
   S.rebirths++; S.coins=0; S.upgrades={}; S.totalEarned=0; dirty=true;
   toast(`🔄 Wiedergeburt! Jetzt x${rebirthMult()} + neue Karten`); closePanel(); renderAll(); } }); }
